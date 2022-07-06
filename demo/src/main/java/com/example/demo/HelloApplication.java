@@ -3,75 +3,35 @@ package com.example.demo;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.scene.*;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
-import javafx.scene.shape.Line;
+import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
+
 
 import java.io.IOException;
 
 public class HelloApplication extends Application {
 
-    private PerspectiveCamera camera;
-    private final double cameraModifier = 50.0;
-    private final double cameraQuantity = 10.0;
-    private final double sceneWidth = 600;
-    private final double sceneHeight = 600;
-    private double mouseXold = 0;
-    private double mouseYold = 0;
-    private final double cameraYlimit = 15;
-    private final double rotateModifier = 25;
+
+    private double statusX;
+    private double statusY;
+    private double statusZ;
 
 
     @Override
     public void start(Stage stage) throws IOException {
 
-        Line line = new Line(1000,1000,1000, 500);
-
-
-        Camera camera = new PerspectiveCamera(true);
-        camera.setFarClip(5000);
-        camera.setTranslateZ(-1000);
-
-        Label label1 = new Label("Перемещение по координате X:");
-        Slider slider1 = new Slider();
-        Label infoLabel = new Label("-");
-
-        slider1.setMin(-100);
-        slider1.setMax(100);
-        slider1.setValue(0);
-
-        slider1.setShowTickLabels(true);
-        slider1.setShowTickMarks(true);
-
-        slider1.setBlockIncrement(10);
-
-        slider1.valueProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                infoLabel.setText("New value:" + newValue);
-            }
-        });
-
-        VBox root = new VBox();
-        root.setPadding(new Insets(20));
-        root.setSpacing(10);
-        root.getChildren().addAll(label1, slider1, infoLabel);
-
-        stage.setTitle("JavaFX Slider");
-        Scene scene1 = new Scene(root, 350, 200);
-        stage.setScene(scene1);
-        stage.show();
 
         Box box = new Box(100,100,100);
         PhongMaterial blackMaterial = new PhongMaterial();
@@ -79,72 +39,109 @@ public class HelloApplication extends Application {
         blackMaterial.setSpecularColor(Color.BLACK);
         box.setMaterial(blackMaterial);
 
+        //Setting the slider for the horizontal translation
+        Slider slider1 = new Slider(0, 200, 0);
+        slider1.setOrientation(Orientation.HORIZONTAL);
+        slider1.setShowTickLabels(true);
+        slider1.setShowTickMarks(true);
+        slider1.setMajorTickUnit(150);
+        slider1.setBlockIncrement(150);
+        //Creating the translation transformation
+        Translate translate = new Translate();
+        //Linking the transformation to the slider
+        slider1.valueProperty().addListener(new ChangeListener<Number>() {
+            public void changed(ObservableValue<?extends Number> observable, Number oldValue, Number newValue){
+                translate.setX((double) newValue);
+                statusX = (double) newValue;
+            }
+        });
+
         box.setRotationAxis(Rotate.X_AXIS);
         box.setRotate(45);
 
-        Group group = new Group();
-        group.getChildren().addAll(box);
-        group.getChildren().addAll(line);
-
-        Scene scene = new Scene(group, 1000, 700);
-        scene.setCamera(camera);
-
-        scene.setOnMouseClicked(event -> {
-            Node picked = event.getPickResult().getIntersectedNode();
-            if (null != picked) {
-                double scalar = 2;
-                if(picked.getScaleX() > 1)
-                    scalar = 1;
-                picked.setScaleX(scalar);
-                picked.setScaleY(scalar);
-                picked.setScaleZ(scalar);
+        //Setting the slider for the vertical translation
+        Slider slider2 = new Slider(0, 200, 0);
+        slider2.setOrientation(Orientation.HORIZONTAL);
+        slider2.setShowTickLabels(true);
+        slider2.setShowTickMarks(true);
+        slider2.setMajorTickUnit(50);
+        slider2.setBlockIncrement(50);
+        //Creating the translation transformation
+        slider2.valueProperty().addListener(new ChangeListener<Number>() {
+            public void changed(ObservableValue <?extends Number>observable, Number oldValue, Number newValue){
+                translate.setY((double) newValue);
+                statusY = (double) newValue;
             }
         });
 
-        scene.setOnKeyPressed(event -> {
-            double change = cameraQuantity;
-            if (event.isShiftDown()) {
-                change = cameraModifier;
-            }
-            KeyCode keycode = event.getCode();
-            if (keycode == KeyCode.W) {
-                camera.setTranslateZ(camera.getTranslateZ() + change);
-            }
-            if (keycode == KeyCode.S) {
-                camera.setTranslateZ(camera.getTranslateZ() - change);
-            }
-            if (keycode == KeyCode.A) {
-                camera.setTranslateX(camera.getTranslateX() - change);
-            }
-            if (keycode == KeyCode.D) {
-                camera.setTranslateX(camera.getTranslateX() + change);
+
+        Slider slider3 = new Slider(0, 200, 0);
+        slider3.setOrientation(Orientation.HORIZONTAL);
+        slider3.setShowTickLabels(true);
+        slider3.setShowTickMarks(true);
+        slider3.setMajorTickUnit(50);
+        slider3.setBlockIncrement(50);
+        //Creating the translation transformation
+        slider3.valueProperty().addListener(new ChangeListener<Number>() {
+            public void changed(ObservableValue <?extends Number>observable, Number oldValue, Number newValue){
+
+                translate.setZ((double) newValue);
+                statusZ = (double) newValue;
             }
         });
-        Rotate xRotate = new Rotate(0,0,0,0, Rotate.X_AXIS);
-        Rotate yRotate = new Rotate(0,0,0,0, Rotate.Y_AXIS);
-        camera.getTransforms().addAll(xRotate,yRotate);
-        scene.addEventHandler(MouseEvent.ANY, event -> {
-            if (event.getEventType() == MouseEvent.MOUSE_PRESSED ||
-                    event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
-                double mouseXnew = event.getSceneX();
-                double mouseYnew = event.getSceneY();
-                if (event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
-                    double pitchRotate = xRotate.getAngle() + (mouseYnew - mouseYold) / rotateModifier;
-                    pitchRotate = pitchRotate > cameraYlimit ? cameraYlimit : pitchRotate;
-                    pitchRotate = pitchRotate < -cameraYlimit ? -cameraYlimit : pitchRotate;
-                    xRotate.setAngle(pitchRotate);
-                    double yawRotate = yRotate.getAngle() - (mouseXnew - mouseXold) / rotateModifier;
-                    yRotate.setAngle(yawRotate);
-                }
-                mouseXold = mouseXnew;
-                mouseYold = mouseYnew;
+
+        Slider slider4 = new Slider(0, 360, 0);
+        slider4.setOrientation(Orientation.HORIZONTAL);
+        slider4.setShowTickLabels(true);
+        slider4.setShowTickMarks(true);
+        slider4.setMajorTickUnit(90);
+        slider4.setBlockIncrement(10);
+        slider4.setOrientation(Orientation.VERTICAL);
+        slider4.setLayoutX(2);
+        slider4.setLayoutY(195);
+
+        Rotate rotate = new Rotate();
+        //Setting pivot points for the rotation
+        rotate.setPivotX(300);
+        rotate.setPivotY(100);
+        //Adding the transformation to rectangle
+        box.getTransforms().addAll(rotate);
+        //Linking the transformation to the slider
+        slider4.valueProperty().addListener(new ChangeListener<Number>() {
+            public void changed(ObservableValue <?extends Number>observable, Number oldValue, Number newValue){
+                //Setting the angle for the rotation
+                rotate.setAngle((double) newValue);
             }
         });
+        //Adding the transformation to the circle
+        box.getTransforms().add(rotate);
+
+        //Creating the translation transformation
+        box.getTransforms().add(translate);
+
+        Label sign = new Label("X = " + toString() + statusX + "    Y = " + toString() + statusY + "    Z = " +
+                toString() + statusZ);
+
+
+        BorderPane pane = new BorderPane();
+        pane.getChildren().add(sign);
+        pane.setRight(new VBox(new Label("Движение по X"), slider1, new VBox(new Label("Движение по Y"), slider2),
+                new VBox (new Label("Движение по Z"), slider3), new VBox(new Label("Повернуть"), slider4)));
+        pane.setCenter(box);
+        pane.setBottom(sign);
+        Scene scene = new Scene(pane, 595, 300);
+        stage.setTitle("Translate Example");
+
+
         stage.setScene(scene);
         stage.show();
+
     }
+
 
     public static void main(String[] args) {
         launch();
     }
+
+
 }
